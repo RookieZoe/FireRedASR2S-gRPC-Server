@@ -1,0 +1,16 @@
+__pycache__
+.sisyphus
+.*_cache
+output
+dist
+models
+logs
+*.egg-info
+*.egg
+*.log
+*.tar.gz
+*.wav
+*.TextGrid
+*.srt
+*.swp
+*.swo
