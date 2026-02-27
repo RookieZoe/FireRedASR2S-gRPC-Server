@@ -14,37 +14,51 @@ Real-time ASR API for FireRedASR2S with gRPC streaming support.
 ### Installation
 
 ```bash
-cd api
-pip install -e ".[dev]"
+cd FireRedASR2S-gRPC-Server
+uv sync
+```
+
+Then, set up the FireRedASR2S dependency:
+
+```bash
+git clone https://github.com/FireRedTeam/FireRedASR2S.git vendor/FireRedASR2S
 ```
 
 ### Start Server
 
 Standard usage:
 ```bash
-python -m fireredasr2s_api.serve
+uv run python -m asr2s_grpc.serve
 ```
 
 With custom model directory and features:
 ```bash
 # Disable LID and Punc
-python -m fireredasr2s_api.serve --enable-lid 0 --enable-punc 0
+uv run python -m asr2s_grpc.serve --enable-lid 0 --enable-punc 0
 
 # Using custom model directory
-python -m fireredasr2s_api.serve --model-dir /path/to/models
+uv run python -m asr2s_grpc.serve --model-dir /path/to/models
 
 ```
 
 Using environment variables:
 ```bash
-MODEL_DIR=/path/to/models python -m fireredasr2s_api.serve
+MODEL_DIR=/path/to/models uv run python -m asr2s_grpc.serve
 ```
 
-Running from the `api/` directory:
+Running from the `FireRedASR2S-gRPC-Server/` directory:
 ```bash
-# The API automatically detects the repository root and finds pretrained_models/
-cd api
-python -m fireredasr2s_api.serve
+# The API automatically detects the repository root and finds models/
+cd FireRedASR2S-gRPC-Server
+uv run python -m asr2s_grpc.serve
+```
+
+### Setup with Vendor Approach (PYTHONPATH)
+
+If using the vendor directory approach, run commands with PYTHONPATH set:
+
+```bash
+PYTHONPATH=vendor/FireRedASR2S uv run python -m asr2s_grpc.serve
 ```
 
 ## Path Resolution
@@ -53,7 +67,7 @@ The API uses a robust path resolution strategy to find model files:
 
 1.  **CLI Flag**: `--model-dir` takes highest precedence.
 2.  **Environment Variable**: `MODEL_DIR` is used if the CLI flag is not provided.
-3.  **Automatic Detection**: If neither is provided, the API looks for a `pretrained_models/` directory relative to the repository root.
+3.  **Automatic Detection**: If neither is provided, the API looks for a `models/` directory relative to the repository root.
 
 **Note on "Base Directory" semantics**: `MODEL_DIR` should point to the directory *containing* the individual model folders (e.g., `FireRedASR2-AED`, `FireRedVAD`, etc.). If `MODEL_DIR=/path/to/models`, the API will look for `/path/to/models/FireRedASR2-AED`.
 
@@ -123,7 +137,7 @@ Environment variables:
 
 - `API_HOST`: Server host (default: `0.0.0.0`)
 - `GRPC_PORT`: gRPC port (default: `50051`)
-- `MODEL_DIR`: Base directory for pretrained models (e.g., `/path/to/models`)
+- `MODEL_DIR`: Base directory for models (e.g., `/path/to/models`)
 - `LOG_LEVEL`: Logging level (default: `INFO`)
 
 ### ASR Backend Selection (`--asr-type`)
@@ -132,17 +146,17 @@ The server selects the ASR backend at startup via the `--asr-type` CLI flag. Cli
 
 | `--asr-type` | Model directory | Max audio length | Timestamps | Confidence |
 |------------|-----------------|-----------------|-----------|------------|
-| `aed` (default) | `pretrained_models/FireRedASR2-AED` | 60 seconds | Yes | Yes |
-| `llm` | `pretrained_models/FireRedASR2-LLM` | **40 seconds** | No | No |
+| `aed` (default) | `models/FireRedASR2-AED` | 60 seconds | Yes | Yes |
+| `llm` | `models/FireRedASR2-LLM` | **40 seconds** | No | No |
 
 **Usage examples:**
 
 ```bash
 # Start with default AED backend
-python -m fireredasr2s_api.serve --asr-type aed
+uv run python -m asr2s_grpc.serve --asr-type aed
 
 # Start with LLM backend
-python -m fireredasr2s_api.serve --asr-type llm
+uv run python -m asr2s_grpc.serve --asr-type llm
 ```
 
 **LLM-specific decoding parameters** (per-request, passed in `llm_params`):
@@ -166,20 +180,20 @@ python -m fireredasr2s_api.serve --asr-type llm
 ### Run Tests
 
 ```bash
-pytest tests/ -v
+uv run pytest tests/ -v
 ```
 
 ### Type Checking
 
 ```bash
-mypy src/fireredasr2s_api
+uv run mypy src/asr2s_grpc
 ```
 
 ### Code Formatting
 
 ```bash
-black src/ tests/
-isort src/ tests/
+uv run black src/ tests/
+uv run isort src/ tests/
 ```
 
 ## License

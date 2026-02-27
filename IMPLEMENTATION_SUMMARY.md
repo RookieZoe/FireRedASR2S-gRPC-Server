@@ -9,7 +9,7 @@ Complete implementation of real-time ASR API for FireRedASR2S with gRPC streamin
 - Created `api/` directory structure
 - Added `pyproject.toml` with dependencies
 - Set up pytest configuration
-- Created package structure under `src/fireredasr2s_api/`
+- Created package structure under `src/asr2s_grpc/`
 - Added test structure
 
 ### Task 2: API Contracts ✅
@@ -76,13 +76,14 @@ Complete implementation of real-time ASR API for FireRedASR2S with gRPC streamin
 ## File Structure
 
 ```
-api/
+FireRedASR2S-gRPC-Server/
 ├── README.md
+├── IMPLEMENTATION_SUMMARY.md
 ├── pyproject.toml
 ├── protos/
 │   └── asr.proto
 ├── src/
-│   └── fireredasr2s_api/
+│   └── asr2s_grpc/
 │       ├── __init__.py
 │       ├── config.py
 │       ├── session.py
@@ -90,7 +91,11 @@ api/
 │       ├── grpc_server.py
 │       ├── postprocessing.py
 │       ├── validation.py
-│       └── cli.py
+│       ├── cli.py
+│       ├── asr_pb2.py
+│       ├── asr_pb2_grpc.py
+│       ├── __main__.py
+│       └── vad_utils.py
 └── tests/
     ├── __init__.py
     ├── conftest.py
@@ -111,17 +116,17 @@ api/
 
 | Model | Used | Evidence | Notes/Impact |
 | :--- | :--- | :--- | :--- |
-| FireRedASR2-LLM | **YES** | `api/src/fireredasr2s_api/backend.py:149-225` | Runtime loaded via `FireRedAsr2.from_pretrained("llm", ...)` |
-| FireRedASR2-AED | **YES** | `api/src/fireredasr2s_api/backend.py:74-146` | Runtime loaded in `backend.py` via `FireRedAsr2.from_pretrained("aed", ...)` |
-| FireRedVAD | **YES** | `api/src/fireredasr2s_api/vad_utils.py:46-69` | Runtime loaded in `vad_utils.py` via `FireRedStreamVad.from_pretrained(...)` |
-| FireRedLID | **YES** | `api/src/fireredasr2s_api/postprocessing.py:45-60` | Runtime loaded in `postprocessing.py` via `FireRedLid.from_pretrained(...)` |
-| FireRedPunc | **YES** | `api/src/fireredasr2s_api/postprocessing.py:62-75` | Runtime loaded in `postprocessing.py` via `FireRedPunc.from_pretrained(...)` |
+| FireRedASR2-LLM | **YES** | `src/asr2s_grpc/backend.py:149-225` | Runtime loaded via `FireRedAsr2.from_pretrained("llm", ...)` |
+| FireRedASR2-AED | **YES** | `src/asr2s_grpc/backend.py:74-146` | Runtime loaded in `backend.py` via `FireRedAsr2.from_pretrained("aed", ...)` |
+| FireRedVAD | **YES** | `src/asr2s_grpc/vad_utils.py:46-69` | Runtime loaded in `vad_utils.py` via `FireRedStreamVad.from_pretrained(...)` |
+| FireRedLID | **YES** | `src/asr2s_grpc/postprocessing.py:45-60` | Runtime loaded in `postprocessing.py` via `FireRedLid.from_pretrained(...)` |
+| FireRedPunc | **YES** | `src/asr2s_grpc/postprocessing.py:62-75` | Runtime loaded in `postprocessing.py` via `FireRedPunc.from_pretrained(...)` |
 
 ## Next Steps
 
-1. Run tests: `pytest api/tests/ -v`
-2. Install package: `pip install -e api/`
-3. Start gRPC server: `python -m fireredasr2s_api.serve`
+1. Run tests: `uv run pytest tests/ -v`
+2. Install package: `uv sync`
+3. Start gRPC server: `uv run python -m asr2s_grpc.serve`
 
 ## Dependencies
 
