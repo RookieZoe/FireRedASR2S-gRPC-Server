@@ -1,4 +1,4 @@
-# FireRedASR2S gRPC Server — Real-time ASR with gRPC streaming
+# FireRedASR2S gRPC Server
 
 The FireRedASR2S gRPC Server provides a high-performance, real-time Automatic Speech Recognition (ASR) interface for the FireRedASR2S models. It supports bidirectional gRPC streaming, enabling low-latency transcription for service-to-service communication.
 
