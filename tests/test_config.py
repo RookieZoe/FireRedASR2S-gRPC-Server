@@ -18,7 +18,7 @@ from unittest import mock
 
 import pytest
 
-from fireredasr2s_api.config import (
+from asr2s_grpc.config import (
     ApiConfig,
     AsrBackendConfig,
     LidConfig,
@@ -38,8 +38,8 @@ class TestDefaultRepoRootResolution:
             f"ASR model_dir should be absolute, got: {config.asr.model_dir}"
         )
         
-        assert config.asr.model_dir.endswith("pretrained_models/FireRedASR2-AED"), (
-            f"ASR model_dir should end with pretrained_models/FireRedASR2-AED, got: {config.asr.model_dir}"
+        assert config.asr.model_dir.endswith("models/FireRedASR2-AED"), (
+            f"ASR model_dir should end with models/FireRedASR2-AED, got: {config.asr.model_dir}"
         )
 
     def test_default_vad_model_dir_is_absolute_under_reporoot(self):
@@ -50,8 +50,8 @@ class TestDefaultRepoRootResolution:
             f"VAD model_dir should be absolute, got: {config.vad.model_dir}"
         )
         
-        assert config.vad.model_dir.endswith("pretrained_models/FireRedVAD/VAD"), (
-            f"VAD model_dir should end with pretrained_models/FireRedVAD/VAD, got: {config.vad.model_dir}"
+        assert config.vad.model_dir.endswith("models/FireRedVAD/VAD"), (
+            f"VAD model_dir should end with models/FireRedVAD/VAD, got: {config.vad.model_dir}"
         )
 
     def test_default_lid_model_dir_is_absolute_under_reporoot(self):
@@ -62,8 +62,8 @@ class TestDefaultRepoRootResolution:
             f"LID model_dir should be absolute, got: {config.lid.model_dir}"
         )
         
-        assert config.lid.model_dir.endswith("pretrained_models/FireRedLID"), (
-            f"LID model_dir should end with pretrained_models/FireRedLID, got: {config.lid.model_dir}"
+        assert config.lid.model_dir.endswith("models/FireRedLID"), (
+            f"LID model_dir should end with models/FireRedLID, got: {config.lid.model_dir}"
         )
 
     def test_default_punc_model_dir_is_absolute_under_reporoot(self):
@@ -74,18 +74,18 @@ class TestDefaultRepoRootResolution:
             f"Punc model_dir should be absolute, got: {config.punc.model_dir}"
         )
         
-        assert config.punc.model_dir.endswith("pretrained_models/FireRedPunc"), (
-            f"Punc model_dir should end with pretrained_models/FireRedPunc, got: {config.punc.model_dir}"
+        assert config.punc.model_dir.endswith("models/FireRedPunc"), (
+            f"Punc model_dir should end with models/FireRedPunc, got: {config.punc.model_dir}"
         )
 
     def test_all_default_paths_share_common_repo_root(self):
         """All default model paths should share the same repo-root base."""
         config = ApiConfig()
         
-        asr_root = config.asr.model_dir.rsplit("pretrained_models", 1)[0]
-        vad_root = config.vad.model_dir.rsplit("pretrained_models", 1)[0]
-        lid_root = config.lid.model_dir.rsplit("pretrained_models", 1)[0]
-        punc_root = config.punc.model_dir.rsplit("pretrained_models", 1)[0]
+        asr_root = config.asr.model_dir.rsplit("models", 1)[0]
+        vad_root = config.vad.model_dir.rsplit("models", 1)[0]
+        lid_root = config.lid.model_dir.rsplit("models", 1)[0]
+        punc_root = config.punc.model_dir.rsplit("models", 1)[0]
         
         assert asr_root == vad_root == lid_root == punc_root, (
             f"All model paths should share repo root. ASR root: {asr_root}, "
@@ -210,7 +210,7 @@ class TestMissingRepoRootFallback:
             config = ApiConfig()
             
             assert any(
-                "repo root" in record.message.lower() 
+                "repo root" in record.message.lower() or "models" in record.message.lower()
                 or "fallback" in record.message.lower()
                 or "cwd" in record.message.lower()
                 for record in caplog.records
@@ -327,7 +327,7 @@ class TestModelDirPrecedence:
         config = ApiConfig()
         
         assert os.path.isabs(config.asr.model_dir)
-        assert "pretrained_models" in config.asr.model_dir
+        assert "models" in config.asr.model_dir
 
 
 class TestComponentModelDirDefaults:
@@ -398,7 +398,7 @@ class TestEdgeCases:
 # Tests for resolve_asr_model_dir() and LLM path resolution
 # ---------------------------------------------------------------------------
 
-from fireredasr2s_api.config import resolve_asr_model_dir
+from asr2s_grpc.config import resolve_asr_model_dir
 
 
 class TestResolveAsrModelDir:
@@ -409,7 +409,7 @@ class TestResolveAsrModelDir:
         result = resolve_asr_model_dir(
             asr_type="aed",
             base_dir="/models",
-            explicit_model_dir="pretrained_models/FireRedASR2-AED",
+            explicit_model_dir="models/FireRedASR2-AED",
         )
         assert result == "/models/FireRedASR2-AED"
 
@@ -418,7 +418,7 @@ class TestResolveAsrModelDir:
         result = resolve_asr_model_dir(
             asr_type="llm",
             base_dir="/models",
-            explicit_model_dir="pretrained_models/FireRedASR2-AED",
+            explicit_model_dir="models/FireRedASR2-AED",
         )
         assert result == "/models/FireRedASR2-LLM"
 
@@ -456,7 +456,7 @@ class TestResolveAsrModelDir:
         result = resolve_asr_model_dir(
             asr_type="llm",
             base_dir="/models",
-            explicit_model_dir="pretrained_models/FireRedASR2-LLM",
+            explicit_model_dir="models/FireRedASR2-LLM",
         )
         assert result == "/models/FireRedASR2-LLM"
 

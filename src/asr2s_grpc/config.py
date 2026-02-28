@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 # Map from component name to (default_model_dir_value, component_suffix)
 _COMPONENT_DEFAULTS: Dict[str, Tuple[str, str]] = {
-    "asr": ("pretrained_models/FireRedASR2-AED", "FireRedASR2-AED"),
-    "vad": ("pretrained_models/FireRedVAD/VAD", "FireRedVAD/VAD"),
-    "lid": ("pretrained_models/FireRedLID", "FireRedLID"),
-    "punc": ("pretrained_models/FireRedPunc", "FireRedPunc"),
+    "asr": ("models/FireRedASR2-AED", "FireRedASR2-AED"),
+    "vad": ("models/FireRedVAD/VAD", "FireRedVAD/VAD"),
+    "lid": ("models/FireRedLID", "FireRedLID"),
+    "punc": ("models/FireRedPunc", "FireRedPunc"),
 }
 
 # Map from asr_type to the default model directory suffix
@@ -26,7 +26,7 @@ _ASR_TYPE_SUFFIXES: Dict[str, str] = {
 
 # Set of known ASR default model_dir values (any of these means "not user-supplied")
 _ASR_DEFAULT_MODEL_DIRS = {
-    f"pretrained_models/{suffix}" for suffix in _ASR_TYPE_SUFFIXES.values()
+    f"models/{suffix}" for suffix in _ASR_TYPE_SUFFIXES.values()
 }
 
 
@@ -85,13 +85,13 @@ def resolve_asr_model_dir(
     return os.path.join(base_dir, suffix)
 
 def _resolve_repo_root() -> Optional[str]:
-    """Walk up from CWD looking for a directory containing pretrained_models/.
+    """Walk up from CWD looking for a directory containing models/.
 
     Returns the repo root path as a string, or None if not found.
     """
     current = Path.cwd().resolve()
     while True:
-        if (current / "pretrained_models").is_dir():
+        if (current / "models").is_dir():
             return str(current)
         parent = current.parent
         if parent == current:
@@ -124,14 +124,14 @@ def _get_model_base_dir(model_base_dir: Optional[str] = None) -> str:
     # 3. Repo root detection
     repo_root = _resolve_repo_root()
     if repo_root is not None:
-        return os.path.join(repo_root, "pretrained_models")
+        return os.path.join(repo_root, "models")
 
     # 4. Fallback to CWD
     logger.warning(
-        "Could not find repo root with pretrained_models/ directory. "
+        "Could not find repo root with models/ directory. "
         "Falling back to CWD for model paths."
     )
-    return os.path.join(os.getcwd(), "pretrained_models")
+    return os.path.join(os.getcwd(), "models")
 
 
 @dataclass
@@ -166,7 +166,7 @@ class AsrBackendConfig:
 
     # Model type and paths
     asr_type: str = "aed"  # "aed" or "llm"
-    model_dir: str = "pretrained_models/FireRedASR2-AED"
+    model_dir: str = "models/FireRedASR2-AED"
 
     # Inference configuration
     use_gpu: bool = True
@@ -200,7 +200,7 @@ class AsrBackendConfig:
 class VadConfig:
     """Configuration for VAD module."""
 
-    model_dir: str = "pretrained_models/FireRedVAD/VAD"
+    model_dir: str = "models/FireRedVAD/VAD"
     use_gpu: bool = False  # VAD typically runs on CPU
 
     # Non-streaming VAD parameters
@@ -218,7 +218,7 @@ class VadConfig:
 class LidConfig:
     """Configuration for LID module."""
 
-    model_dir: str = "pretrained_models/FireRedLID"
+    model_dir: str = "models/FireRedLID"
     use_gpu: bool = True
     use_half: bool = False
 
@@ -227,7 +227,7 @@ class LidConfig:
 class PuncConfig:
     """Configuration for Punctuation module."""
 
-    model_dir: str = "pretrained_models/FireRedPunc"
+    model_dir: str = "models/FireRedPunc"
     use_gpu: bool = True
     batch_size: int = 1
     with_timestamp: bool = True

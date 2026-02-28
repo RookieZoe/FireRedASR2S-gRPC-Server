@@ -28,7 +28,7 @@ class TestLLMBackendInit:
         with patch("fireredasr2s.fireredasr2.FireRedAsr2.from_pretrained") as mock_from:
             mock_from.return_value = MagicMock()
 
-            from fireredasr2s_api.backend import LLMBackend
+            from asr2s_grpc.backend import LLMBackend
 
             with patch.object(LLMBackend, "_load_model") as mock_load:
                 backend = LLMBackend("/path/to/llm", use_gpu=False)
@@ -36,7 +36,7 @@ class TestLLMBackendInit:
 
     def test_init_stores_attributes(self):
         """__init__ stores model_dir, use_gpu, default_config."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend(
@@ -50,7 +50,7 @@ class TestLLMBackendInit:
 
     def test_init_default_config_is_empty_dict(self):
         """config=None → default_config is empty dict."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend("/path/to/llm")
@@ -65,7 +65,7 @@ class TestLLMBackendInit:
                 mock_config_instance = MagicMock()
                 MockConfig.return_value = mock_config_instance
 
-                from fireredasr2s_api.backend import LLMBackend
+                from asr2s_grpc.backend import LLMBackend
 
                 backend = LLMBackend.__new__(LLMBackend)
                 backend.model_dir = "/path/to/llm"
@@ -85,7 +85,7 @@ class TestLLMBackendInit:
             side_effect=RuntimeError("Model not found"),
         ):
             with patch("fireredasr2s.fireredasr2.FireRedAsr2Config"):
-                from fireredasr2s_api.backend import LLMBackend
+                from asr2s_grpc.backend import LLMBackend
 
                 backend = LLMBackend.__new__(LLMBackend)
                 backend.model_dir = "/nonexistent"
@@ -104,7 +104,7 @@ class TestLLMBackendMaxAudioLength:
 
     def test_max_audio_length_is_40(self):
         """LLM backend max audio length is 40 seconds."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend("/path/to/llm")
@@ -112,7 +112,7 @@ class TestLLMBackendMaxAudioLength:
 
     def test_max_audio_length_type_is_float(self):
         """get_max_audio_length returns a float."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend("/path/to/llm")
@@ -128,7 +128,7 @@ class TestLLMBackendTranscribeOutput:
 
     def _make_backend(self):
         """Create an LLMBackend with mocked model."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend("/path/to/llm")
@@ -233,7 +233,7 @@ class TestLLMBackendParamOverride:
 
     def _make_backend(self, default_config=None):
         """Create LLMBackend with mocked model and optional default config."""
-        from fireredasr2s_api.backend import LLMBackend
+        from asr2s_grpc.backend import LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = LLMBackend("/path/to/llm", config=default_config)
@@ -324,7 +324,7 @@ class TestCreateBackendLLM:
 
     def test_create_backend_returns_llm(self):
         """create_backend('llm', ...) returns LLMBackend."""
-        from fireredasr2s_api.backend import create_backend, LLMBackend
+        from asr2s_grpc.backend import create_backend, LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = create_backend("llm", "/path/to/llm")
@@ -332,7 +332,7 @@ class TestCreateBackendLLM:
 
     def test_create_backend_passes_kwargs(self):
         """create_backend passes kwargs like use_gpu and config to LLMBackend."""
-        from fireredasr2s_api.backend import create_backend, LLMBackend
+        from asr2s_grpc.backend import create_backend, LLMBackend
 
         with patch.object(LLMBackend, "_load_model"):
             backend = create_backend(

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from fireredasr2s_api.session import FinalResult
+from asr2s_grpc.session import FinalResult
 
 
 class TestLidPuncDefaultOn:
@@ -17,9 +17,9 @@ class TestLidPuncDefaultOn:
     @patch("fireredasr2s.fireredpunc.punc.FireRedPunc")
     def test_final_result_with_lid_punc_enabled(self, mock_punc, mock_lid):
         """RED: Final result should have language field and punctuation when LID/Punc enabled."""
-        from fireredasr2s_api.session import StreamingSession
-        from fireredasr2s_api.postprocessing import Postprocessor
-        from fireredasr2s_api.config import ApiConfig
+        from asr2s_grpc.session import StreamingSession
+        from asr2s_grpc.postprocessing import Postprocessor
+        from asr2s_grpc.config import ApiConfig
 
         mock_lid_instance = MagicMock()
         mock_lid_instance.process.return_value = [
@@ -71,7 +71,7 @@ class TestLidPuncDefaultOn:
     @patch("fireredasr2s.fireredpunc.punc.FireRedPunc")
     def test_enable_lid_punc_by_default(self, mock_punc, mock_lid):
         """RED: LID and Punc should be enabled by default."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         mock_lid.from_pretrained.return_value = MagicMock()
         mock_punc.from_pretrained.return_value = MagicMock()
@@ -98,7 +98,7 @@ class TestLidDisabled:
     @patch("fireredasr2s.fireredlid.FireRedLid")
     def test_final_result_without_language_when_lid_disabled(self, mock_lid):
         """RED: Final result should have empty language and 0 confidence when LID disabled."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(
             session_id="test-003",
@@ -118,7 +118,7 @@ class TestLidDisabled:
     @patch("fireredasr2s.fireredlid.FireRedLid")
     def test_lid_model_not_loaded_when_disabled(self, mock_lid):
         """RED: LID model should not be loaded when enable_lid=False."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(
             session_id="test-004",
@@ -138,7 +138,7 @@ class TestPuncDisabled:
     @patch("fireredasr2s.fireredpunc.punc.FireRedPunc")
     def test_final_result_without_punctuation_when_punc_disabled(self, mock_punc):
         """RED: Final text should NOT have punctuation when Punc disabled."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(
             session_id="test-005",
@@ -160,7 +160,7 @@ class TestPuncDisabled:
     @patch("fireredasr2s.fireredpunc.punc.FireRedPunc")
     def test_punc_model_not_loaded_when_disabled(self, mock_punc):
         """RED: Punc model should not be loaded when enable_punc=False."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(
             session_id="test-006",
@@ -179,7 +179,7 @@ class TestPartialResultsNoPunctuation:
 
     def test_partial_result_no_punctuation(self):
         """RED: Partial result text should NOT have punctuation."""
-        from fireredasr2s_api.session import PartialResult
+        from asr2s_grpc.session import PartialResult
 
         # Partial result should be raw ASR output without punctuation
         partial = PartialResult(
@@ -198,7 +198,7 @@ class TestPartialResultsNoPunctuation:
 
     def test_partial_result_different_from_final(self):
         """RED: Partial and final should have different punctuation states."""
-        from fireredasr2s_api.session import PartialResult
+        from asr2s_grpc.session import PartialResult
 
         # Partial: no punctuation
         partial = PartialResult(
@@ -237,7 +237,7 @@ class TestPartialResultsNoPunctuation:
         ]
         mock_punc.from_pretrained.return_value = mock_punc_instance
 
-        from fireredasr2s_api.session import PartialResult
+        from asr2s_grpc.session import PartialResult
 
         partial = PartialResult(
             segment_id="seg-003",

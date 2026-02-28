@@ -4,7 +4,7 @@
 
 import pytest
 
-from fireredasr2s_api import asr_pb2
+from asr2s_grpc import asr_pb2
 
 
 class TestStreamingRecognizeRequest:
@@ -352,7 +352,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, AsyncMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -363,14 +363,14 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
 
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(
@@ -416,7 +416,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -427,13 +427,13 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(
@@ -474,7 +474,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -485,13 +485,13 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(
@@ -546,7 +546,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -557,13 +557,13 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(
@@ -609,7 +609,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -620,13 +620,13 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(
@@ -672,7 +672,7 @@ class TestSliceValidationErrors:
         from unittest.mock import MagicMock, patch
 
         with patch(
-            "fireredasr2s_api.grpc_server.create_backend"
+            "asr2s_grpc.grpc_server.create_backend"
         ) as mock_create_backend:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
@@ -683,13 +683,13 @@ class TestSliceValidationErrors:
             }
             mock_create_backend.return_value = mock_backend
 
-            from fireredasr2s_api.grpc_server import ASRServiceServicer
-            from fireredasr2s_api.config import ApiConfig
+            from asr2s_grpc.grpc_server import ASRServiceServicer
+            from asr2s_grpc.config import ApiConfig
 
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 mock_vad.process_slice_audio.return_value = MagicMock(

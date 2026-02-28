@@ -7,8 +7,8 @@ import time
 import numpy as np
 import pytest
 
-from fireredasr2s_api.config import SessionConfig
-from fireredasr2s_api.session import (
+from asr2s_grpc.config import SessionConfig
+from asr2s_grpc.session import (
     FinalResult,
     PartialResult,
     SessionState,

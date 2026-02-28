@@ -14,7 +14,7 @@ import struct
 import pytest
 from unittest.mock import MagicMock, patch
 
-from fireredasr2s_api.validation import validate_llm_params, _LLM_DEFAULTS
+from asr2s_grpc.validation import validate_llm_params, _LLM_DEFAULTS
 
 
 
@@ -122,16 +122,16 @@ class TestGrpcLlmParams:
     @pytest.fixture(autouse=True)
     def _skip_if_grpc_import_broken(self):
         """Skip all tests if grpc_server can't be imported (proto import issue)."""
-        pytest.importorskip("fireredasr2s_api.grpc_server")
+        pytest.importorskip("asr2s_grpc.grpc_server")
 
     @pytest.mark.asyncio
     async def test_grpc_config_stores_llm_params(self):
         """gRPC config with LLM params stores them on session."""
-        from fireredasr2s_api import asr_pb2
-        from fireredasr2s_api.grpc_server import ASRServiceServicer
-        from fireredasr2s_api.config import ApiConfig, AsrBackendConfig
+        from asr2s_grpc import asr_pb2
+        from asr2s_grpc.grpc_server import ASRServiceServicer
+        from asr2s_grpc.config import ApiConfig, AsrBackendConfig
 
-        with patch("fireredasr2s_api.grpc_server.create_backend") as mock_create:
+        with patch("asr2s_grpc.grpc_server.create_backend") as mock_create:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
             mock_backend.transcribe.return_value = {
@@ -143,7 +143,7 @@ class TestGrpcLlmParams:
 
             servicer = ASRServiceServicer(ApiConfig(asr=AsrBackendConfig(asr_type="llm")))
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 MockVadState.return_value = mock_vad
@@ -187,11 +187,11 @@ class TestGrpcLlmParams:
     @pytest.mark.asyncio
     async def test_grpc_config_without_llm_params_gets_defaults(self):
         """gRPC config without LLM fields → session gets defaults (proto3 zero-value handling)."""
-        from fireredasr2s_api import asr_pb2
-        from fireredasr2s_api.grpc_server import ASRServiceServicer
-        from fireredasr2s_api.config import ApiConfig, AsrBackendConfig
+        from asr2s_grpc import asr_pb2
+        from asr2s_grpc.grpc_server import ASRServiceServicer
+        from asr2s_grpc.config import ApiConfig, AsrBackendConfig
 
-        with patch("fireredasr2s_api.grpc_server.create_backend") as mock_create:
+        with patch("asr2s_grpc.grpc_server.create_backend") as mock_create:
             mock_backend = MagicMock()
             mock_backend.get_max_audio_length.return_value = 60.0
             mock_backend.transcribe.return_value = {
@@ -204,7 +204,7 @@ class TestGrpcLlmParams:
             servicer = ASRServiceServicer(ApiConfig())
             servicer.backends["aed"] = mock_backend
 
-            with patch("fireredasr2s_api.grpc_server._SessionVadState") as MockVadState:
+            with patch("asr2s_grpc.grpc_server._SessionVadState") as MockVadState:
                 mock_vad = MagicMock()
                 mock_vad.initialize.return_value = None
                 MockVadState.return_value = mock_vad
@@ -259,7 +259,7 @@ class TestGrpcLlmParams:
     @pytest.mark.asyncio
     async def test_grpc_proto3_zero_values_treated_as_unset(self):
         """Proto3 zero-value fields (0.0) treated as unset → defaults applied."""
-        from fireredasr2s_api import asr_pb2
+        from asr2s_grpc import asr_pb2
 
         # Proto3: unset floats default to 0.0
         config = asr_pb2.RecognitionConfig(
@@ -292,7 +292,7 @@ class TestGrpcLlmParams:
     @pytest.mark.asyncio
     async def test_grpc_explicit_llm_params_preserved(self):
         """Proto config with explicit non-zero LLM params → preserved in session."""
-        from fireredasr2s_api import asr_pb2
+        from asr2s_grpc import asr_pb2
 
         config = asr_pb2.RecognitionConfig(
             sample_rate=16000,
@@ -330,7 +330,7 @@ class TestSessionLlmAttributes:
 
     def test_session_has_llm_params_attribute(self):
         """New sessions have llm_params dict attribute."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(session_id="test-1")
         assert hasattr(session, "llm_params")
@@ -338,7 +338,7 @@ class TestSessionLlmAttributes:
 
     def test_session_has_asr_type_attribute(self):
         """New sessions have asr_type string attribute."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(session_id="test-2")
         assert hasattr(session, "asr_type")
@@ -346,7 +346,7 @@ class TestSessionLlmAttributes:
 
     def test_session_llm_params_assignable(self):
         """session.llm_params can be assigned a dict."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(session_id="test-3")
         session.llm_params = {"temperature": 0.5, "decode_min_len": 10}
@@ -355,7 +355,7 @@ class TestSessionLlmAttributes:
 
     def test_session_asr_type_assignable(self):
         """session.asr_type can be set to 'llm'."""
-        from fireredasr2s_api.session import StreamingSession
+        from asr2s_grpc.session import StreamingSession
 
         session = StreamingSession(session_id="test-4")
         session.asr_type = "llm"
