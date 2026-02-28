@@ -14,14 +14,14 @@ from google.protobuf import json_format
 
 from . import asr_pb2, asr_pb2_grpc
 from .backend import create_backend
-from .config import ApiConfig, AsrBackendConfig, resolve_asr_model_dir
+from .config import ApiConfig, AsrBackendConfig, resolve_asr_model_dir, resolve_vad_model_dirs
 from .postprocessing import Postprocessor
 from .session import SessionState, StreamingSession
 from .validation import validate_llm_params
 
 logger = logging.getLogger(__name__)
 
-from .vad_utils import _SessionVadState, SliceVadResult, compute_slice_m_ms
+from .vad_utils import _SessionVadState, SliceVadResult, compute_slice_m_ms, preload_vad_models
 
 
 class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
@@ -34,7 +34,10 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
         self.backend: Optional[Any] = None
         self.backends: Dict[str, Any] = {}
         self._backend_lock = threading.Lock()
+        self._vad_models: Dict[str, Any] = {}
+        self._vad_model_dirs: Dict[str, str] = {}
         self._setup_backend()
+        self._setup_vad()
         self._setup_postprocessor()
 
     def _setup_backend(self) -> None:
@@ -77,6 +80,24 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
         except Exception as e:
             logger.error(f"Failed to setup backend: {e}")
             raise
+
+
+    def _setup_vad(self) -> None:
+        """Preload VAD models at server startup."""
+        try:
+            self._vad_model_dirs = resolve_vad_model_dirs(
+                self.config.vad,
+                base_dir=self.config.model_base_dir,
+            )
+            self._vad_models = preload_vad_models(
+                self._vad_model_dirs,
+                use_gpu=self.config.vad.use_gpu,
+            )
+        except Exception as e:
+            logger.error("Failed to preload VAD models: %s", e)
+            # VAD failure is non-fatal; sessions will get empty models
+            self._vad_models = {}
+            self._vad_model_dirs = {}
 
     def _setup_postprocessor(self) -> None:
         """Setup LID/Punc postprocessor."""
@@ -184,8 +205,11 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
 
                     self.sessions[session_id] = session
 
-                    vad_state = _SessionVadState()
-                    vad_state.initialize(getattr(self.config.vad, "model_dir", None))
+                    vad_state = _SessionVadState(
+                        vad_type=self.config.vad.vad_type,
+                        preloaded_models=self._vad_models,
+                        model_dirs=self._vad_model_dirs,
+                    )
                     self._session_vad_states[session_id] = vad_state
 
                     logger.info(
