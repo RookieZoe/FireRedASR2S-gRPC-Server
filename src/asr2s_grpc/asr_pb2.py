@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tasr.proto\x12\x0c\x66ireredasr2s\"\xb7\x01\n\x19StreamingRecognizeRequest\x12\x31\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x1f.fireredasr2s.RecognitionConfigH\x00\x12\x15\n\x0b\x61udio_chunk\x18\x02 \x01(\x0cH\x00\x12\x14\n\nend_stream\x18\x03 \x01(\x08H\x00\x12/\n\x0b\x61udio_slice\x18\x04 \x01(\x0b\x32\x18.fireredasr2s.AudioSliceH\x00\x42\t\n\x07request\")\n\nAudioSlice\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\xf0\x01\n\x11RecognitionConfig\x12\x13\n\x0bsample_rate\x18\x01 \x01(\x05\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12\x19\n\x11\x65nable_timestamps\x18\x03 \x01(\x08\x12\x11\n\tbeam_size\x18\x05 \x01(\x05\x12\x13\n\x0bslice_index\x18\x06 \x01(\x05\x12\x16\n\x0e\x64\x65\x63ode_min_len\x18\x07 \x01(\x05\x12\x1a\n\x12repetition_penalty\x18\x08 \x01(\x02\x12\x1a\n\x12llm_length_penalty\x18\t \x01(\x02\x12\x13\n\x0btemperature\x18\n \x01(\x02J\x04\x08\x04\x10\x05R\x08\x61sr_type\"\xc7\x02\n\x1aStreamingRecognizeResponse\x12.\n\x07partial\x18\x01 \x01(\x0b\x32\x1b.fireredasr2s.PartialResultH\x00\x12*\n\x05\x66inal\x18\x02 \x01(\x0b\x32\x19.fireredasr2s.FinalResultH\x00\x12*\n\x05\x65rror\x18\x03 \x01(\x0b\x32\x19.fireredasr2s.ErrorResultH\x00\x12+\n\tslice_vad\x18\x04 \x01(\x0b\x32\x16.fireredasr2s.SliceVadH\x00\x12\x33\n\nvad_detect\x18\x05 \x01(\x0b\x32\x1d.fireredasr2s.VadDetectResultH\x00\x12\x33\n\naed_detect\x18\x06 \x01(\x0b\x32\x1d.fireredasr2s.AedDetectResultH\x00\x42\n\n\x08response\"\xb2\x01\n\rPartialResult\x12\x12\n\nsegment_id\x18\x01 \x01(\t\x12\x10\n\x08revision\x18\x02 \x01(\x05\x12\x0c\n\x04text\x18\x03 \x01(\t\x12\x12\n\nconfidence\x18\x04 \x01(\x02\x12\x10\n\x08start_ms\x18\x05 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x06 \x01(\x05\x12\x10\n\x08is_final\x18\x07 \x01(\x08\x12\x13\n\x0bslice_index\x18\x08 \x01(\x05J\x04\x08\t\x10\nR\nslice_m_ms\"\xe8\x01\n\x0b\x46inalResult\x12\x12\n\nsegment_id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12)\n\tsentences\x18\x03 \x03(\x0b\x32\x16.fireredasr2s.Sentence\x12!\n\x05words\x18\x04 \x03(\x0b\x32\x12.fireredasr2s.Word\x12\x13\n\x0b\x64uration_ms\x18\x05 \x01(\x05\x12\x10\n\x08language\x18\x06 \x01(\t\x12\x1b\n\x13language_confidence\x18\x07 \x01(\x02\x12\x13\n\x0bslice_index\x18\x08 \x01(\x05J\x04\x08\t\x10\nR\nslice_m_ms\"N\n\x08Sentence\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08start_ms\x18\x02 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x03 \x01(\x05\x12\x12\n\nconfidence\x18\x04 \x01(\x02\"J\n\x04Word\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08start_ms\x18\x02 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x03 \x01(\x05\x12\x12\n\nconfidence\x18\x04 \x01(\x02\",\n\x0b\x45rrorResult\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"x\n\x08SliceVad\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nslice_m_ms\x18\x02 \x01(\x05\x12\x12\n\nslice_n_ms\x18\x03 \x01(\x05\x12\x16\n\x0e\x65nded_speaking\x18\x04 \x01(\x08\x12\x17\n\x0f\x65ntirely_speech\x18\x05 \x01(\x08\".\n\x0cVadTimestamp\x12\x0f\n\x07start_s\x18\x01 \x01(\x02\x12\r\n\x05\x65nd_s\x18\x02 \x01(\x02\"_\n\nAudioEvent\x12\x12\n\nevent_type\x18\x01 \x01(\t\x12.\n\ntimestamps\x18\x02 \x03(\x0b\x32\x1a.fireredasr2s.VadTimestamp\x12\r\n\x05ratio\x18\x03 \x01(\x02\"j\n\x0fVadDetectResult\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nduration_s\x18\x02 \x01(\x02\x12.\n\ntimestamps\x18\x03 \x03(\x0b\x32\x1a.fireredasr2s.VadTimestamp\"d\n\x0f\x41\x65\x64\x44\x65tectResult\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nduration_s\x18\x02 \x01(\x02\x12(\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x18.fireredasr2s.AudioEvent2y\n\nASRService\x12k\n\x12StreamingRecognize\x12\'.fireredasr2s.StreamingRecognizeRequest\x1a(.fireredasr2s.StreamingRecognizeResponse(\x01\x30\x01\x42)Z\'github.com/fireredteam/fireredasr2s/apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tasr.proto\x12\x0c\x66ireredasr2s\"\xb7\x01\n\x19StreamingRecognizeRequest\x12\x31\n\x06\x63onfig\x18\x01 \x01(\x0b\x32\x1f.fireredasr2s.RecognitionConfigH\x00\x12\x15\n\x0b\x61udio_chunk\x18\x02 \x01(\x0cH\x00\x12\x14\n\nend_stream\x18\x03 \x01(\x08H\x00\x12/\n\x0b\x61udio_slice\x18\x04 \x01(\x0b\x32\x18.fireredasr2s.AudioSliceH\x00\x42\t\n\x07request\")\n\nAudioSlice\x12\r\n\x05index\x18\x01 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x82\x02\n\x11RecognitionConfig\x12\x13\n\x0bsample_rate\x18\x01 \x01(\x05\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12\x19\n\x11\x65nable_timestamps\x18\x03 \x01(\x08\x12\x11\n\tbeam_size\x18\x05 \x01(\x05\x12\x13\n\x0bslice_index\x18\x06 \x01(\x05\x12\x16\n\x0e\x64\x65\x63ode_min_len\x18\x07 \x01(\x05\x12\x1a\n\x12repetition_penalty\x18\x08 \x01(\x02\x12\x1a\n\x12llm_length_penalty\x18\t \x01(\x02\x12\x13\n\x0btemperature\x18\n \x01(\x02\x12\x10\n\x08vad_type\x18\x0b \x01(\tJ\x04\x08\x04\x10\x05R\x08\x61sr_type\"\xc7\x02\n\x1aStreamingRecognizeResponse\x12.\n\x07partial\x18\x01 \x01(\x0b\x32\x1b.fireredasr2s.PartialResultH\x00\x12*\n\x05\x66inal\x18\x02 \x01(\x0b\x32\x19.fireredasr2s.FinalResultH\x00\x12*\n\x05\x65rror\x18\x03 \x01(\x0b\x32\x19.fireredasr2s.ErrorResultH\x00\x12+\n\tslice_vad\x18\x04 \x01(\x0b\x32\x16.fireredasr2s.SliceVadH\x00\x12\x33\n\nvad_detect\x18\x05 \x01(\x0b\x32\x1d.fireredasr2s.VadDetectResultH\x00\x12\x33\n\naed_detect\x18\x06 \x01(\x0b\x32\x1d.fireredasr2s.AedDetectResultH\x00\x42\n\n\x08response\"\xb2\x01\n\rPartialResult\x12\x12\n\nsegment_id\x18\x01 \x01(\t\x12\x10\n\x08revision\x18\x02 \x01(\x05\x12\x0c\n\x04text\x18\x03 \x01(\t\x12\x12\n\nconfidence\x18\x04 \x01(\x02\x12\x10\n\x08start_ms\x18\x05 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x06 \x01(\x05\x12\x10\n\x08is_final\x18\x07 \x01(\x08\x12\x13\n\x0bslice_index\x18\x08 \x01(\x05J\x04\x08\t\x10\nR\nslice_m_ms\"\xe8\x01\n\x0b\x46inalResult\x12\x12\n\nsegment_id\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12)\n\tsentences\x18\x03 \x03(\x0b\x32\x16.fireredasr2s.Sentence\x12!\n\x05words\x18\x04 \x03(\x0b\x32\x12.fireredasr2s.Word\x12\x13\n\x0b\x64uration_ms\x18\x05 \x01(\x05\x12\x10\n\x08language\x18\x06 \x01(\t\x12\x1b\n\x13language_confidence\x18\x07 \x01(\x02\x12\x13\n\x0bslice_index\x18\x08 \x01(\x05J\x04\x08\t\x10\nR\nslice_m_ms\"N\n\x08Sentence\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08start_ms\x18\x02 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x03 \x01(\x05\x12\x12\n\nconfidence\x18\x04 \x01(\x02\"J\n\x04Word\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08start_ms\x18\x02 \x01(\x05\x12\x0e\n\x06\x65nd_ms\x18\x03 \x01(\x05\x12\x12\n\nconfidence\x18\x04 \x01(\x02\",\n\x0b\x45rrorResult\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"x\n\x08SliceVad\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nslice_m_ms\x18\x02 \x01(\x05\x12\x12\n\nslice_n_ms\x18\x03 \x01(\x05\x12\x16\n\x0e\x65nded_speaking\x18\x04 \x01(\x08\x12\x17\n\x0f\x65ntirely_speech\x18\x05 \x01(\x08\".\n\x0cVadTimestamp\x12\x0f\n\x07start_s\x18\x01 \x01(\x02\x12\r\n\x05\x65nd_s\x18\x02 \x01(\x02\"_\n\nAudioEvent\x12\x12\n\nevent_type\x18\x01 \x01(\t\x12.\n\ntimestamps\x18\x02 \x03(\x0b\x32\x1a.fireredasr2s.VadTimestamp\x12\r\n\x05ratio\x18\x03 \x01(\x02\"j\n\x0fVadDetectResult\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nduration_s\x18\x02 \x01(\x02\x12.\n\ntimestamps\x18\x03 \x03(\x0b\x32\x1a.fireredasr2s.VadTimestamp\"d\n\x0f\x41\x65\x64\x44\x65tectResult\x12\x13\n\x0bslice_index\x18\x01 \x01(\x05\x12\x12\n\nduration_s\x18\x02 \x01(\x02\x12(\n\x06\x65vents\x18\x03 \x03(\x0b\x32\x18.fireredasr2s.AudioEvent2y\n\nASRService\x12k\n\x12StreamingRecognize\x12\'.fireredasr2s.StreamingRecognizeRequest\x1a(.fireredasr2s.StreamingRecognizeResponse(\x01\x30\x01\x42)Z\'github.com/fireredteam/fireredasr2s/apib\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,29 +37,29 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_AUDIOSLICE']._serialized_start=213
   _globals['_AUDIOSLICE']._serialized_end=254
   _globals['_RECOGNITIONCONFIG']._serialized_start=257
-  _globals['_RECOGNITIONCONFIG']._serialized_end=497
-  _globals['_STREAMINGRECOGNIZERESPONSE']._serialized_start=500
-  _globals['_STREAMINGRECOGNIZERESPONSE']._serialized_end=827
-  _globals['_PARTIALRESULT']._serialized_start=830
-  _globals['_PARTIALRESULT']._serialized_end=1008
-  _globals['_FINALRESULT']._serialized_start=1011
-  _globals['_FINALRESULT']._serialized_end=1243
-  _globals['_SENTENCE']._serialized_start=1245
-  _globals['_SENTENCE']._serialized_end=1323
-  _globals['_WORD']._serialized_start=1325
-  _globals['_WORD']._serialized_end=1399
-  _globals['_ERRORRESULT']._serialized_start=1401
-  _globals['_ERRORRESULT']._serialized_end=1445
-  _globals['_SLICEVAD']._serialized_start=1447
-  _globals['_SLICEVAD']._serialized_end=1567
-  _globals['_VADTIMESTAMP']._serialized_start=1569
-  _globals['_VADTIMESTAMP']._serialized_end=1615
-  _globals['_AUDIOEVENT']._serialized_start=1617
-  _globals['_AUDIOEVENT']._serialized_end=1712
-  _globals['_VADDETECTRESULT']._serialized_start=1714
-  _globals['_VADDETECTRESULT']._serialized_end=1820
-  _globals['_AEDDETECTRESULT']._serialized_start=1822
-  _globals['_AEDDETECTRESULT']._serialized_end=1922
-  _globals['_ASRSERVICE']._serialized_start=1924
-  _globals['_ASRSERVICE']._serialized_end=2045
+  _globals['_RECOGNITIONCONFIG']._serialized_end=515
+  _globals['_STREAMINGRECOGNIZERESPONSE']._serialized_start=518
+  _globals['_STREAMINGRECOGNIZERESPONSE']._serialized_end=845
+  _globals['_PARTIALRESULT']._serialized_start=848
+  _globals['_PARTIALRESULT']._serialized_end=1026
+  _globals['_FINALRESULT']._serialized_start=1029
+  _globals['_FINALRESULT']._serialized_end=1261
+  _globals['_SENTENCE']._serialized_start=1263
+  _globals['_SENTENCE']._serialized_end=1341
+  _globals['_WORD']._serialized_start=1343
+  _globals['_WORD']._serialized_end=1417
+  _globals['_ERRORRESULT']._serialized_start=1419
+  _globals['_ERRORRESULT']._serialized_end=1463
+  _globals['_SLICEVAD']._serialized_start=1465
+  _globals['_SLICEVAD']._serialized_end=1585
+  _globals['_VADTIMESTAMP']._serialized_start=1587
+  _globals['_VADTIMESTAMP']._serialized_end=1633
+  _globals['_AUDIOEVENT']._serialized_start=1635
+  _globals['_AUDIOEVENT']._serialized_end=1730
+  _globals['_VADDETECTRESULT']._serialized_start=1732
+  _globals['_VADDETECTRESULT']._serialized_end=1838
+  _globals['_AEDDETECTRESULT']._serialized_start=1840
+  _globals['_AEDDETECTRESULT']._serialized_end=1940
+  _globals['_ASRSERVICE']._serialized_start=1942
+  _globals['_ASRSERVICE']._serialized_end=2063
 # @@protoc_insertion_point(module_scope)

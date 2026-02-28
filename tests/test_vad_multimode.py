@@ -578,3 +578,209 @@ class TestVadTypeInApiConfig:
         monkeypatch.setenv("MODEL_DIR", "/tmp/models")
         config = ApiConfig(vad=VadConfig(vad_type="aed"))
         assert config.vad.vad_type == "aed"
+
+
+# ---------------------------------------------------------------------------
+# Per-request vad_type override tests
+# ---------------------------------------------------------------------------
+
+
+_VALID_PER_REQUEST_TYPES = ("vad", "stream-vad", "aed")
+
+
+def _validate_client_vad_type(
+    raw_vad_type: str,
+    server_default: str,
+    loaded_models: dict,
+) -> tuple:
+    """Replicate per-request vad_type validation from grpc_server.StreamingRecognize.
+
+    Returns (effective_vad_type, error_code, error_message).
+    If error_code is not None, the request should be rejected.
+    """
+    client_vad_type = raw_vad_type.strip().lower() if raw_vad_type else ""
+    if client_vad_type == "":
+        return server_default, None, None
+    elif client_vad_type == "all":
+        return None, "INVALID_VAD_TYPE", "vad_type 'all' is not allowed for per-session use"
+    elif client_vad_type not in _VALID_PER_REQUEST_TYPES:
+        return None, "INVALID_VAD_TYPE", "vad_type must be one of: vad, stream-vad, aed"
+    elif client_vad_type not in loaded_models:
+        return (
+            None,
+            "VAD_MODEL_UNAVAILABLE",
+            "VAD model for '%s' is not loaded on this server" % client_vad_type,
+        )
+    else:
+        return client_vad_type, None, None
+
+
+class TestPerRequestVadType:
+    """Tests for per-request vad_type override logic.
+
+    Tests the validation logic used in StreamingRecognize for client-specified
+    vad_type, and verifies _SessionVadState creation with the effective type.
+    """
+
+    # Reuse the firered import patching from TestSessionVadStateMultiMode
+    @pytest.fixture(autouse=True)
+    def _patch_firered_imports(self):
+        """Patch fireredasr2s imports so _SessionVadState can be instantiated."""
+        mock_fireredvad = mock.MagicMock()
+        mock_fireredvad.FireRedStreamVad = MockFireRedStreamVad
+        mock_fireredvad.FireRedStreamVadConfig = MockConfig
+        mock_fireredvad.FireRedVad = MockFireRedVad
+        mock_fireredvad.FireRedVadConfig = MockConfig
+        mock_fireredvad.FireRedAed = MockFireRedAed
+        mock_fireredvad.FireRedAedConfig = MockConfig
+
+        mock_constants = mock.MagicMock()
+        mock_constants.FRAME_LENGTH_SAMPLE = 400
+
+        with mock.patch.dict(
+            sys.modules,
+            {
+                "fireredasr2s": mock.MagicMock(),
+                "fireredasr2s.fireredvad": mock_fireredvad,
+                "fireredasr2s.fireredvad.core": mock.MagicMock(),
+                "fireredasr2s.fireredvad.core.constants": mock_constants,
+                "fireredasr2s.fireredvad.core.stream_vad_postprocessor": mock.MagicMock(),
+            },
+        ):
+            yield
+
+    def test_per_request_vad_type_override(self):
+        """Mock config with vad_type='aed', verify _SessionVadState created with vad_type='aed'."""
+        from asr2s_grpc.vad_utils import _SessionVadState
+
+        # Simulate per-request validation: client sends vad_type='aed'
+        effective, err_code, _ = _validate_client_vad_type(
+            raw_vad_type="aed",
+            server_default="stream-vad",
+            loaded_models={"vad": MockFireRedVad(), "stream-vad": MockFireRedStreamVad(), "aed": MockFireRedAed()},
+        )
+        assert err_code is None
+        assert effective == "aed"
+
+        # Create _SessionVadState with the effective vad_type
+        preloaded = {
+            "stream-vad": MockFireRedStreamVad(),
+            "vad": MockFireRedVad(),
+            "aed": MockFireRedAed(),
+        }
+        state = _SessionVadState(
+            vad_type=effective,
+            preloaded_models=preloaded,
+        )
+        assert state._aed is not None
+        assert state._vad is None
+        assert state._stream_vad is None
+
+    def test_per_request_vad_type_empty_uses_server_default(self):
+        """Mock config with vad_type='', verify falls back to server default."""
+        from asr2s_grpc.vad_utils import _SessionVadState
+
+        # Simulate per-request validation: client sends empty vad_type
+        effective, err_code, _ = _validate_client_vad_type(
+            raw_vad_type="",
+            server_default="stream-vad",
+            loaded_models={"vad": MockFireRedVad(), "stream-vad": MockFireRedStreamVad(), "aed": MockFireRedAed()},
+        )
+        assert err_code is None
+        assert effective == "stream-vad"
+
+        # Create _SessionVadState with the server default
+        preloaded = {
+            "stream-vad": MockFireRedStreamVad(),
+            "vad": MockFireRedVad(),
+            "aed": MockFireRedAed(),
+        }
+        model_dirs = {"stream-vad": "/models/FireRedVAD/Stream-VAD"}
+        state = _SessionVadState(
+            vad_type=effective,
+            preloaded_models=preloaded,
+            model_dirs=model_dirs,
+        )
+        assert state._stream_vad is not None
+        assert state._vad is None
+        assert state._aed is None
+
+    def test_per_request_vad_type_all_rejected(self):
+        """Mock config with vad_type='all', verify ErrorResult with code INVALID_VAD_TYPE."""
+        from asr2s_grpc import asr_pb2
+
+        effective, err_code, err_msg = _validate_client_vad_type(
+            raw_vad_type="all",
+            server_default="stream-vad",
+            loaded_models={"vad": MockFireRedVad(), "stream-vad": MockFireRedStreamVad(), "aed": MockFireRedAed()},
+        )
+        assert effective is None
+        assert err_code == "INVALID_VAD_TYPE"
+
+        # Verify ErrorResult can be constructed with the error code
+        error = asr_pb2.ErrorResult(code=err_code, message=err_msg)
+        assert error.code == "INVALID_VAD_TYPE"
+        assert "all" in error.message
+
+    def test_per_request_vad_type_invalid_rejected(self):
+        """Mock config with vad_type='unknown', verify ErrorResult with code INVALID_VAD_TYPE."""
+        from asr2s_grpc import asr_pb2
+
+        effective, err_code, err_msg = _validate_client_vad_type(
+            raw_vad_type="unknown",
+            server_default="stream-vad",
+            loaded_models={"vad": MockFireRedVad(), "stream-vad": MockFireRedStreamVad(), "aed": MockFireRedAed()},
+        )
+        assert effective is None
+        assert err_code == "INVALID_VAD_TYPE"
+
+        # Verify ErrorResult can be constructed with the error code
+        error = asr_pb2.ErrorResult(code=err_code, message=err_msg)
+        assert error.code == "INVALID_VAD_TYPE"
+
+    def test_per_request_vad_type_unavailable_model(self):
+        """Mock config with vad_type='aed' but server only has 'vad' loaded.
+
+        Verify ErrorResult with code VAD_MODEL_UNAVAILABLE."""
+        from asr2s_grpc import asr_pb2
+
+        # Server only has 'vad' loaded, not 'aed'
+        effective, err_code, err_msg = _validate_client_vad_type(
+            raw_vad_type="aed",
+            server_default="vad",
+            loaded_models={"vad": MockFireRedVad()},
+        )
+        assert effective is None
+        assert err_code == "VAD_MODEL_UNAVAILABLE"
+
+        # Verify ErrorResult can be constructed with the error code
+        error = asr_pb2.ErrorResult(code=err_code, message=err_msg)
+        assert error.code == "VAD_MODEL_UNAVAILABLE"
+        assert "aed" in error.message
+
+    def test_per_request_vad_type_case_insensitive(self):
+        """Mock config with vad_type='VAD', verify lowercased and accepted."""
+        from asr2s_grpc.vad_utils import _SessionVadState
+
+        # Simulate per-request validation: client sends 'VAD' (uppercase)
+        effective, err_code, _ = _validate_client_vad_type(
+            raw_vad_type="VAD",
+            server_default="stream-vad",
+            loaded_models={"vad": MockFireRedVad(), "stream-vad": MockFireRedStreamVad(), "aed": MockFireRedAed()},
+        )
+        assert err_code is None
+        assert effective == "vad"  # lowercased
+
+        # Create _SessionVadState with the lowercased effective vad_type
+        preloaded = {
+            "stream-vad": MockFireRedStreamVad(),
+            "vad": MockFireRedVad(),
+            "aed": MockFireRedAed(),
+        }
+        state = _SessionVadState(
+            vad_type=effective,
+            preloaded_models=preloaded,
+        )
+        assert state._vad is not None
+        assert state._stream_vad is None
+        assert state._aed is None

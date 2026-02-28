@@ -35,6 +35,7 @@ message RecognitionConfig {
   float repetition_penalty = 8;
   float llm_length_penalty = 9;
   float temperature = 10;
+  string vad_type = 11;
 }
 
 message StreamingRecognizeResponse {

@@ -174,6 +174,31 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
                 if request.HasField("config"):
                     config = request.config
 
+                    # --- client vad_type extraction & validation ---
+                    client_vad_type = config.vad_type.strip().lower() if config.vad_type else ""
+                    if client_vad_type == "":
+                        effective_vad_type = self.config.vad.vad_type
+                    elif client_vad_type == "all":
+                        yield self._create_error_response(
+                            "INVALID_VAD_TYPE",
+                            "vad_type 'all' is not allowed for per-session use",
+                        )
+                        continue
+                    elif client_vad_type not in ("vad", "stream-vad", "aed"):
+                        yield self._create_error_response(
+                            "INVALID_VAD_TYPE",
+                            "vad_type must be one of: vad, stream-vad, aed",
+                        )
+                        continue
+                    elif client_vad_type not in self._vad_models:
+                        yield self._create_error_response(
+                            "VAD_MODEL_UNAVAILABLE",
+                            "VAD model for '%s' is not loaded on this server" % client_vad_type,
+                        )
+                        continue
+                    else:
+                        effective_vad_type = client_vad_type
+
                     if config.slice_index < 0:
                         yield self._create_error_response(
                             "MISSING_SLICE_INDEX",
@@ -206,7 +231,7 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
                     self.sessions[session_id] = session
 
                     vad_state = _SessionVadState(
-                        vad_type=self.config.vad.vad_type,
+                        vad_type=effective_vad_type,
                         preloaded_models=self._vad_models,
                         model_dirs=self._vad_model_dirs,
                     )
@@ -214,6 +239,13 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
 
                     logger.info(
                         f"Created session {session_id} slice_index={config.slice_index} asr_type={asr_type}"
+                    )
+                    logger.info(
+                        "Session %s using vad_type=%s (client=%s, server=%s)",
+                        session_id,
+                        effective_vad_type,
+                        client_vad_type or "(empty)",
+                        self.config.vad.vad_type,
                     )
                     expected_slice_index = config.slice_index
 
