@@ -288,6 +288,55 @@ class ASRServiceServicer(asr_pb2_grpc.ASRServiceServicer):
                         response.slice_vad.CopyFrom(slice_vad)
                         yield response
 
+                        # Emit non-streaming VAD detect result if available
+                        if vad_state.vad_type in {"vad", "all"}:
+                            vad_detect_data = vad_state.get_vad_detect_result()
+                            if vad_detect_data is not None:
+                                vad_timestamps = [
+                                    asr_pb2.VadTimestamp(start_s=float(s), end_s=float(e))
+                                    for s, e in vad_detect_data.get("timestamps", [])
+                                ]
+                                vad_detect = asr_pb2.VadDetectResult(
+                                    slice_index=session.slice_index,
+                                    duration_s=float(vad_detect_data.get("dur", 0.0)),
+                                    timestamps=vad_timestamps,
+                                )
+                                response = asr_pb2.StreamingRecognizeResponse()
+                                response.vad_detect.CopyFrom(vad_detect)
+                                yield response
+
+                        # Emit non-streaming AED detect result if available
+                        if vad_state.vad_type in {"aed", "all"}:
+                            aed_detect_data = vad_state.get_aed_detect_result()
+                            if aed_detect_data is not None:
+                                event2timestamps = aed_detect_data.get("event2timestamps", {})
+                                events = []
+                                if isinstance(event2timestamps, dict):
+                                    for evt_type, evt_ts in event2timestamps.items():
+                                        evt_timestamps = [
+                                            asr_pb2.VadTimestamp(start_s=float(s), end_s=float(e))
+                                            for s, e in evt_ts
+                                        ]
+                                        # Compute ratio as total event duration / slice duration
+                                        dur = float(aed_detect_data.get("dur", 0.0))
+                                        evt_dur = sum(float(e) - float(s) for s, e in evt_ts)
+                                        ratio = evt_dur / dur if dur > 0 else 0.0
+                                        events.append(
+                                            asr_pb2.AudioEvent(
+                                                event_type=str(evt_type),
+                                                timestamps=evt_timestamps,
+                                                ratio=ratio,
+                                            )
+                                        )
+                                aed_detect = asr_pb2.AedDetectResult(
+                                    slice_index=session.slice_index,
+                                    duration_s=float(aed_detect_data.get("dur", 0.0)),
+                                    events=events,
+                                )
+                                response = asr_pb2.StreamingRecognizeResponse()
+                                response.aed_detect.CopyFrom(aed_detect)
+                                yield response
+
                     partial_results = await self._process_audio_chunk(
                         session, audio_data, session_backend
                     )

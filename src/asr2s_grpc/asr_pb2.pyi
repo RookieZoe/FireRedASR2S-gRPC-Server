@@ -145,3 +145,42 @@ class SliceVad(_message.Message):
     ended_speaking: bool
     entirely_speech: bool
     def __init__(self, slice_index: _Optional[int] = ..., slice_m_ms: _Optional[int] = ..., slice_n_ms: _Optional[int] = ..., ended_speaking: bool = ..., entirely_speech: bool = ...) -> None: ...
+
+
+class VadTimestamp(_message.Message):
+    __slots__ = ("start_s", "end_s")
+    START_S_FIELD_NUMBER: _ClassVar[int]
+    END_S_FIELD_NUMBER: _ClassVar[int]
+    start_s: float
+    end_s: float
+    def __init__(self, start_s: _Optional[float] = ..., end_s: _Optional[float] = ...) -> None: ...
+
+class AudioEvent(_message.Message):
+    __slots__ = ("event_type", "timestamps", "ratio")
+    EVENT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TIMESTAMPS_FIELD_NUMBER: _ClassVar[int]
+    RATIO_FIELD_NUMBER: _ClassVar[int]
+    event_type: str
+    timestamps: _containers.RepeatedCompositeFieldContainer[VadTimestamp]
+    ratio: float
+    def __init__(self, event_type: _Optional[str] = ..., timestamps: _Optional[_Iterable[_Union[VadTimestamp, _Mapping]]] = ..., ratio: _Optional[float] = ...) -> None: ...
+
+class VadDetectResult(_message.Message):
+    __slots__ = ("slice_index", "duration_s", "timestamps")
+    SLICE_INDEX_FIELD_NUMBER: _ClassVar[int]
+    DURATION_S_FIELD_NUMBER: _ClassVar[int]
+    TIMESTAMPS_FIELD_NUMBER: _ClassVar[int]
+    slice_index: int
+    duration_s: float
+    timestamps: _containers.RepeatedCompositeFieldContainer[VadTimestamp]
+    def __init__(self, slice_index: _Optional[int] = ..., duration_s: _Optional[float] = ..., timestamps: _Optional[_Iterable[_Union[VadTimestamp, _Mapping]]] = ...) -> None: ...
+
+class AedDetectResult(_message.Message):
+    __slots__ = ("slice_index", "duration_s", "events")
+    SLICE_INDEX_FIELD_NUMBER: _ClassVar[int]
+    DURATION_S_FIELD_NUMBER: _ClassVar[int]
+    EVENTS_FIELD_NUMBER: _ClassVar[int]
+    slice_index: int
+    duration_s: float
+    events: _containers.RepeatedCompositeFieldContainer[AudioEvent]
+    def __init__(self, slice_index: _Optional[int] = ..., duration_s: _Optional[float] = ..., events: _Optional[_Iterable[_Union[AudioEvent, _Mapping]]] = ...) -> None: ...

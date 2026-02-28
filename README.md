@@ -86,6 +86,8 @@ Bidirectional streaming RPC for service-to-service communication.
 - `slice_vad`: SliceVad message with `slice_index`, `slice_m_ms`, `slice_n_ms`, `ended_speaking`, and `entirely_speech`. Emitted before `partial` or `final` for the same slice.
 - `partial`: PartialResult with text, confidence, timestamps, and **slice_index**.
 - `final`: FinalResult with punctuated text, sentences, words, **language**, **language_confidence**, and **slice_index**.
+- `vad_detect`: VadDetectResult with speech timestamps, duration, and **slice_index**.
+- `aed_detect`: AedDetectResult with detected audio events (speech, singing, music) and **slice_index**.
 - `error`: ErrorResult with code and message.
 
 ### Slice-Based VAD Segmentation
@@ -131,6 +133,20 @@ The API includes optional Language Identification (LID) and Punctuation (Punc) m
 | `ended_speaking`| bool | Whether a speech segment ended within this slice |
 | `entirely_speech`| bool | Whether the entire slice was detected as speech |
 
+**VadDetectResult event fields:**
+| Field | Type | Description |
+|-------|------|-------------|
+| `slice_index` | int32 | Client-assigned slice identifier |
+| `duration_s` | float | Total duration of the audio slice in seconds |
+| `timestamps` | repeated VadTimestamp | List of detected speech intervals (start_s, end_s) |
+
+**AedDetectResult event fields:**
+| Field | Type | Description |
+|-------|------|-------------|
+| `slice_index` | int32 | Client-assigned slice identifier |
+| `duration_s` | float | Total duration of the audio slice in seconds |
+| `events` | repeated AudioEvent | List of detected events (speech, singing, music) |
+
 ## Configuration
 
 Environment variables:
@@ -174,6 +190,36 @@ uv run python -m asr2s_grpc.serve --asr-type llm
 - Word-level timestamps are **not supported** — `words` is always empty (`[]`).
 - The `confidence` field is **not returned** in LLM transcription results.
 - Proto3 zero-values for LLM params (e.g., `temperature=0.0`) are treated as unset and fall back to defaults.
+
+### VAD Mode Selection (`--vad-type`)
+
+The server supports multiple VAD and Audio Event Detection (AED) modes, selectable via the `--vad-type` CLI flag.
+
+| `--vad-type` | Model directory | Mode | Use case |
+|--------------|-----------------|------|----------|
+| `vad` | `models/FireRedVAD` | Non-streaming VAD | Precise speech timestamps per slice |
+| `stream-vad` | `models/FireRedVAD` | Streaming VAD | Real-time segmentation and events |
+| `aed` | `models/FireRedASR2-AED` | AED | Detecting speech vs music vs singing |
+| `all` (default)| Both | Combined | Load all modes (streaming uses stream-vad) |
+
+**Usage examples:**
+
+```bash
+# Default: load all VAD modes
+uv run python -m asr2s_grpc.serve --vad-type all
+
+# Streaming VAD only (standard real-time behavior)
+uv run python -m asr2s_grpc.serve --vad-type stream-vad
+
+# Audio Event Detection only
+uv run python -m asr2s_grpc.serve --vad-type aed
+```
+
+**Mode descriptions:**
+- **`vad`**: Returns speech timestamps for the entire slice in a `vad_detect` message.
+- **`stream-vad`**: Provides real-time `slice_vad` events used for low-latency ASR triggering.
+- **`aed`**: Returns `aed_detect` results identifying specific audio events (speech, singing, music, etc.).
+- **`all`**: Loads all modules. `slice_vad` is used for streaming logic, while `vad_detect` and `aed_detect` results are also emitted.
 
 ## Development
 
