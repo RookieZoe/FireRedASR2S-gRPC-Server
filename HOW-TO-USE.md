@@ -102,4 +102,4 @@ The `--vad-type` flag controls which Voice Activity Detection models are loaded:
 
 ## Client Usage
 
-To interact with this server, please refer to the [FireRedASR2S-gRPC-Client](https://github.com/FireRedTeam/FireRedASR2S-gRPC-Client) repository for client-side implementation and examples.
+To interact with this server, please refer to the [FireRedASR2S-gRPC-Client](https://github.com/RookieZoe/FireRedASR2S-gRPC-Client) repository for client-side implementation and examples.

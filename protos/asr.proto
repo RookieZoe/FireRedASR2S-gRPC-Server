@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package fireredasr2s;
 
-option go_package = "github.com/fireredteam/fireredasr2s/api";
+option go_package = "github.com/RookieZoe/FireRedASR2S-gRPC-Server/src";
 
 service ASRService {
   rpc StreamingRecognize(stream StreamingRecognizeRequest) returns (stream StreamingRecognizeResponse);
