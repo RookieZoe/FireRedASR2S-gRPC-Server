@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # Map from component name to (default_model_dir_value, component_suffix)
 _COMPONENT_DEFAULTS: Dict[str, Tuple[str, str]] = {
     "asr": ("models/FireRedASR2-AED", "FireRedASR2-AED"),
-    "vad": ("models/FireRedVAD/VAD", "FireRedVAD/VAD"),
+    "vad": ("models/FireRedVAD/Stream-VAD", "FireRedVAD/Stream-VAD"),
     "lid": ("models/FireRedLID", "FireRedLID"),
     "punc": ("models/FireRedPunc", "FireRedPunc"),
 }
@@ -22,6 +22,13 @@ _COMPONENT_DEFAULTS: Dict[str, Tuple[str, str]] = {
 _ASR_TYPE_SUFFIXES: Dict[str, str] = {
     "aed": "FireRedASR2-AED",
     "llm": "FireRedASR2-LLM",
+}
+
+# Map from vad_type to the model directory suffix
+_VAD_TYPE_MAP: dict[str, str] = {
+    "vad": "FireRedVAD/VAD",
+    "stream-vad": "FireRedVAD/Stream-VAD",
+    "aed": "FireRedVAD/AED",
 }
 
 # Set of known ASR default model_dir values (any of these means "not user-supplied")
@@ -83,6 +90,45 @@ def resolve_asr_model_dir(
             f"Unknown asr_type '{asr_type}'. Expected one of: {list(_ASR_TYPE_SUFFIXES)}"
         )
     return os.path.join(base_dir, suffix)
+
+def resolve_vad_model_dirs(
+    vad_config: "VadConfig",
+    base_dir: Optional[str] = None,
+) -> dict[str, str]:
+    """Resolve VAD model directories based on vad_type.
+
+    If vad_type='all', returns a dict with paths for all modes:
+    {'vad': path, 'stream-vad': path, 'aed': path}
+
+    If vad_type is a single mode (e.g., 'stream-vad'), returns a dict with
+    just that mode: {'stream-vad': path}
+
+    Args:
+        vad_config: VadConfig instance with vad_type and model_dir.
+        base_dir: Model base directory. If None, uses parent of vad_config.model_dir.
+
+    Returns:
+        Dict mapping vad_type(s) to absolute model directory paths.
+    """
+    if base_dir is None:
+        # Derive base_dir from the configured model_dir
+        base_dir = os.path.dirname(vad_config.model_dir)
+
+    if vad_config.vad_type == "all":
+        # Return all three VAD modes
+        return {
+            mode: os.path.join(base_dir, suffix)
+            for mode, suffix in _VAD_TYPE_MAP.items()
+        }
+    else:
+        # Return single mode
+        suffix = _VAD_TYPE_MAP.get(vad_config.vad_type)
+        if suffix is None:
+            raise ValueError(
+                f"Unknown vad_type '{vad_config.vad_type}'. "
+                f"Expected 'all' or one of: {list(_VAD_TYPE_MAP.keys())}"
+            )
+        return {vad_config.vad_type: os.path.join(base_dir, suffix)}
 
 def _resolve_repo_root() -> Optional[str]:
     """Walk up from CWD looking for a directory containing models/.
@@ -200,7 +246,8 @@ class AsrBackendConfig:
 class VadConfig:
     """Configuration for VAD module."""
 
-    model_dir: str = "models/FireRedVAD/VAD"
+    model_dir: str = "models/FireRedVAD/Stream-VAD"
+    vad_type: str = "all"
     use_gpu: bool = False  # VAD typically runs on CPU
 
     # Non-streaming VAD parameters

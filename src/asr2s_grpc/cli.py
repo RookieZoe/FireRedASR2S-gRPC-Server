@@ -7,7 +7,7 @@ import asyncio
 import logging
 import sys
 
-from .config import ApiConfig, AsrBackendConfig
+from .config import ApiConfig, AsrBackendConfig, VadConfig
 from .serve import main as serve_main
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,13 @@ def main() -> None:
         choices=["aed", "llm"],
         help="ASR backend type (default: aed)",
     )
+    parser.add_argument(
+        "--vad-type",
+        type=str,
+        default=None,
+        choices=["vad", "stream-vad", "aed", "all"],
+        help="VAD mode (default: all)",
+    )
 
     args = parser.parse_args()
 
@@ -82,8 +89,8 @@ def main() -> None:
         enable_lid=bool(args.enable_lid),
         enable_punc=bool(args.enable_punc),
         asr=AsrBackendConfig(asr_type=args.asr_type),
+        vad=VadConfig(vad_type=args.vad_type) if args.vad_type else VadConfig(),
     )
-
     try:
         asyncio.run(
             serve_main(

@@ -2,6 +2,7 @@
 """Shared VAD utilities for gRPC server."""
 
 import logging
+import os
 from typing import Any, Optional
 
 import numpy as np
@@ -45,13 +46,21 @@ class _SessionVadState:
 
             config = FireRedStreamVadConfig(use_gpu=False)
             if vad_model_dir:
+                # Validate model files exist before loading
+                model_pth = os.path.join(vad_model_dir, "model.pth.tar")
+                cmvn_ark = os.path.join(vad_model_dir, "cmvn.ark")
+                if not os.path.isfile(model_pth):
+                    raise RuntimeError(f"VAD model file not found: {model_pth}")
+                if not os.path.isfile(cmvn_ark):
+                    raise RuntimeError(f"VAD model file not found: {cmvn_ark}")
                 self.stream_vad = FireRedStreamVad.from_pretrained(
                     vad_model_dir, config
                 )
+                logger.info("Loaded VAD model from %s", vad_model_dir)
             else:
                 raise RuntimeError("VAD model directory not provided")
         except Exception as e:
-            logger.error(f"Failed to initialize StreamVAD: {e}")
+            logger.error("Failed to initialize StreamVAD: %s", e)
             raise RuntimeError(f"FireRedVAD initialization failed: {e}")
 
     def process_slice_audio(

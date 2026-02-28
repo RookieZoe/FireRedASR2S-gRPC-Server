@@ -43,6 +43,8 @@ message StreamingRecognizeResponse {
     FinalResult final = 2;
     ErrorResult error = 3;
     SliceVad slice_vad = 4;
+    VadDetectResult vad_detect = 5;
+    AedDetectResult aed_detect = 6;
   }
 }
 
@@ -97,4 +99,27 @@ message SliceVad {
   int32 slice_n_ms = 3;
   bool ended_speaking = 4;
   bool entirely_speech = 5;
+}
+
+message VadTimestamp {
+  float start_s = 1;
+  float end_s = 2;
+}
+
+message AudioEvent {
+  string event_type = 1;
+  repeated VadTimestamp timestamps = 2;
+  float ratio = 3;
+}
+
+message VadDetectResult {
+  int32 slice_index = 1;
+  float duration_s = 2;
+  repeated VadTimestamp timestamps = 3;
+}
+
+message AedDetectResult {
+  int32 slice_index = 1;
+  float duration_s = 2;
+  repeated AudioEvent events = 3;
 }

@@ -50,8 +50,8 @@ class TestDefaultRepoRootResolution:
             f"VAD model_dir should be absolute, got: {config.vad.model_dir}"
         )
         
-        assert config.vad.model_dir.endswith("models/FireRedVAD/VAD"), (
-            f"VAD model_dir should end with models/FireRedVAD/VAD, got: {config.vad.model_dir}"
+        assert config.vad.model_dir.endswith("models/FireRedVAD/Stream-VAD"), (
+            f"VAD model_dir should end with models/FireRedVAD/Stream-VAD, got: {config.vad.model_dir}"
         )
 
     def test_default_lid_model_dir_is_absolute_under_reporoot(self):
@@ -116,7 +116,7 @@ class TestModelDirEnvVarOverride:
         
         config = ApiConfig()
         
-        expected = os.path.join(env_base_dir, "FireRedVAD/VAD")
+        expected = os.path.join(env_base_dir, "FireRedVAD/Stream-VAD")
         assert config.vad.model_dir == expected, (
             f"VAD model_dir should use MODEL_DIR env override. "
             f"Expected: {expected}, got: {config.vad.model_dir}"
@@ -341,7 +341,7 @@ class TestComponentModelDirDefaults:
     def test_vad_default_component_path(self):
         """VAD model_dir should have correct component path."""
         config = ApiConfig()
-        assert config.vad.model_dir.endswith("FireRedVAD/VAD")
+        assert config.vad.model_dir.endswith("FireRedVAD/Stream-VAD")
 
     def test_lid_default_component_path(self):
         """LID model_dir should have correct component path."""
@@ -574,7 +574,7 @@ class TestLlmPathResolutionIntegration:
             asr=AsrBackendConfig(asr_type="llm"),
         )
 
-        assert config.vad.model_dir == "/tmp/models/FireRedVAD/VAD"
+        assert config.vad.model_dir == "/tmp/models/FireRedVAD/Stream-VAD"
         assert config.lid.model_dir == "/tmp/models/FireRedLID"
         assert config.punc.model_dir == "/tmp/models/FireRedPunc"
 
